@@ -11,6 +11,16 @@ async function getAllEmployees() {
 }
 
 /**
+ * Loads system configuration
+ * @returns {{MaxDailyHours: number}}
+ */
+
+async function getConfig() {
+    let rawData = await fs.readFile("config.json")
+    return JSON.parse(rawData)
+}
+
+/**
  * Find a single employee given their ID number.
  * @param {string} empId
  * @returns {{ employeeId: string, name: string, phone: string }|undefined}
@@ -139,5 +149,6 @@ module.exports = {
     findAssignment,
     getEmployeeShifts,
     addAssignment,
-    addEmployeeRecord
+    addEmployeeRecord,
+    getConfig
 }
