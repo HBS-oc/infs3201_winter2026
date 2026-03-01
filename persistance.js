@@ -30,8 +30,8 @@ async function getAllEmployees() {
  * @param {string} id
  * @returns {Promise<Object|null>} employee
  */
-async function getEmployeeById(id) {
-    return await db.collection("employees").findOne({ id: id });
+async function getEmployeeById(employeeId) {
+    return await db.collection("employees").findOne({ employeeId: employeeId });
 }
 
 /**
@@ -41,9 +41,9 @@ async function getEmployeeById(id) {
  * @param {string} phone
  * @returns {Promise<void>}
  */
-async function updateEmployee(id, name, phone) {
+async function updateEmployee(employeeId, name, phone) {
     await db.collection("employees").updateOne(
-        { id: id },
+        { employeeId: employeeId },
         { $set: { name: name, phone: phone } }
     );
 }
