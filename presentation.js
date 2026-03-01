@@ -1,11 +1,18 @@
 const bus = require("./business.js")
-const prompt = require("prompt-sync")()
+const express = require("express")
+const app  = express()
+const PORT = 8000
 
 
+app.use(express.urlencoded())
+
+app.get("/", (req, res) => {
+    res.send("Server runnning")
+})
 
 async function start() {
-    await bus.connect();
-    displayMenu(); 
+    await bus.connect()
+    app.listen(8000, () => {console.log("Server has started")})
 }
 
 start();
