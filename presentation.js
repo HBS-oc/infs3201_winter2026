@@ -1,6 +1,15 @@
 const bus = require("./business.js")
 const prompt = require("prompt-sync")()
 
+
+
+async function start() {
+    await bus.connect();
+    displayMenu(); 
+}
+
+start();
+
 /**
  * A function to interact with the user and display the results of the
  * employee schedule in a CSV like format.

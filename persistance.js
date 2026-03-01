@@ -1,6 +1,6 @@
 const { MongoClient } = require("mongodb");
 
-const CONNECTION_STRING = "YOUR_MONGODB_CONNECTION_STRING_HERE";
+const CONNECTION_STRING = "mongodb+srv://60302091:G3TeCNnCT7HoFoo2@cluster0.wrr68.mongodb.net/";
 const DATABASE_NAME = "infs3201_winter2026";
 
 let db;
