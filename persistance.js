@@ -1,154 +1,102 @@
-const fs = require("fs/promises")
+const { MongoClient } = require("mongodb");
+
+const CONNECTION_STRING = "YOUR_MONGODB_CONNECTION_STRING_HERE";
+const DATABASE_NAME = "infs3201_winter2026";
+
+let db;
 
 /**
- * Return a list of all employees loaded from the storage.
- * @returns {Array<{ employeeId: string, name: string, phone: string }>} List of employees
+ * Connects to MongoDB and initializes the database reference.
+ * Must be called before using any other persistence functions.
+ * @returns {Promise<void>}
+ */
+async function connect() {
+    const client = new MongoClient(CONNECTION_STRING);
+    await client.connect();
+    db = client.db(DATABASE_NAME);
+}
+
+
+/**
+ * Retrieves all employees.
+ * @returns {Promise<Array>} list of employees
  */
 async function getAllEmployees() {
-    let rawData = await fs.readFile("employees.json")
-    let result = JSON.parse(rawData)
-    return result
+    return await db.collection("employees").find().toArray();
 }
 
 /**
- * Loads system configuration
- * @returns {{MaxDailyHours: number}}
+ * Retrieves a single employee by ID.
+ * @param {string} id
+ * @returns {Promise<Object|null>} employee
  */
-
-async function getConfig() {
-    let rawData = await fs.readFile("config.json")
-    return JSON.parse(rawData)
+async function getEmployeeById(id) {
+    return await db.collection("employees").findOne({ id: id });
 }
 
 /**
- * Find a single employee given their ID number.
- * @param {string} empId
- * @returns {{ employeeId: string, name: string, phone: string }|undefined}
+ * Updates an employee's name and phone.
+ * @param {string} id
+ * @param {string} name
+ * @param {string} phone
+ * @returns {Promise<void>}
  */
-async function findEmployee(empId) {
-    let rawData = await fs.readFile("employees.json")
-    let employeeList = JSON.parse(rawData)
-    for (let emp of employeeList) {
-        if (emp.employeeId === empId) {
-            return emp
-        }
-    }
-    return undefined
+async function updateEmployee(id, name, phone) {
+    await db.collection("employees").updateOne(
+        { id: id },
+        { $set: { name: name, phone: phone } }
+    );
+}
+
+
+/**
+ * Retrieves all shifts.
+ * @returns {Promise<Array>}
+ */
+async function getAllShifts() {
+    return await db.collection("shifts").find().toArray();
 }
 
 /**
- * Get a single shift given the shiftId
- * @param {string} shiftId
- * @returns {{shiftId:string, date:string, startTime:string, endTime:string}|undefined}
+ * Retrieves shifts for a specific employee.
+ * Uses MongoDB query instead of loading entire collection.
+ * @param {string} employeeId
+ * @returns {Promise<Array>}
  */
-async function findShift(shiftId) {
-    let rawData = await fs.readFile("shifts.json")
-    let shiftList = JSON.parse(rawData)
-    for (let shift of shiftList) {
-        if (shift.shiftId == shiftId) {
-            return shift
-        }
-    }
-    return undefined
+async function getShiftsByEmployeeId(employeeId) {
+    return await db.collection("shifts")
+        .find({ employeeId: employeeId })
+        .sort({ date: 1, startTime: 1 })
+        .toArray();
+}
+
+
+/**
+ * Retrieves all assignments.
+ * @returns {Promise<Array>}
+ */
+async function getAllAssignments() {
+    return await db.collection("assignments").find().toArray();
 }
 
 /**
- * Find a shift assignment record give the employeeId and the shiftId.
- * @param {string} empId
- * @param {string} shiftId
- * @returns {{employeeId:string, shiftId:string}|undefined}
+ * Retrieves assignments for a specific employee.
+ * @param {string} employeeId
+ * @returns {Promise<Array>}
  */
-async function findAssignment(empId, shiftId) {
-    let rawData = await fs.readFile("assignments.json")
-    let assignmentList = JSON.parse(rawData)
-    for (let asn of assignmentList) {
-        if (asn.employeeId === empId && asn.shiftId === shiftId) {
-            return asn
-        }
-    }
-    return undefined
-}
-
-/**
- * Get a list of shiftIDs for an employee.
- * NOTE: This is temporarily kept in persistence to minimize refactor.
- * Later it can move to business layer.
- * @param {string} empId
- * @returns {Array<{string}>}
- */
-async function getEmployeeShifts(empId) {
-    let rawData = await fs.readFile("assignments.json")
-    let assignmentList = JSON.parse(rawData)
-
-    let shiftIds = []
-    for (let asn of assignmentList) {
-        if (asn.employeeId == empId) {
-            shiftIds.push(asn.shiftId)
-        }
-    }
-
-    rawData = await fs.readFile("shifts.json")
-    let shiftList = JSON.parse(rawData)
-
-    let shiftDetails = []
-    for (let sh of shiftList) {
-        if (shiftIds.includes(sh.shiftId)) {
-            shiftDetails.push(sh)
-        }
-    }
-
-    return shiftDetails
-}
-
-/**
- * Record a new assignment of an employee to a shift.
- * @param {string} empId
- * @param {string} shiftId
- */
-async function addAssignment(empId, shiftId) {
-    let rawData = await fs.readFile("assignments.json")
-    let assignmentList = JSON.parse(rawData)
-
-    assignmentList.push({ employeeId: empId, shiftId: shiftId })
-
-    await fs.writeFile(
-        "assignments.json",
-        JSON.stringify(assignmentList, null, 4)
-    )
-}
-
-/**
- * Add a new employee record to the system.
- * @param {{name:string, phone:string}} emp
- */
-async function addEmployeeRecord(emp) {
-    let maxId = 0
-    let rawData = await fs.readFile("employees.json")
-    let employeeList = JSON.parse(rawData)
-
-    for (let e of employeeList) {
-        let eid = Number(e.employeeId.slice(1))
-        if (eid > maxId) {
-            maxId = eid
-        }
-    }
-
-    emp.employeeId = `E${String(maxId + 1).padStart(3, "0")}`
-    employeeList.push(emp)
-
-    await fs.writeFile(
-        "employees.json",
-        JSON.stringify(employeeList, null, 4)
-    )
+async function getAssignmentsByEmployeeId(employeeId) {
+    return await db.collection("assignments")
+        .find({ employeeId: employeeId })
+        .toArray();
 }
 
 module.exports = {
+    connect,
     getAllEmployees,
-    findEmployee,
-    findShift,
-    findAssignment,
-    getEmployeeShifts,
-    addAssignment,
-    addEmployeeRecord,
-    getConfig
-}
+    getEmployeeById,
+    updateEmployee,
+    getAllShifts,
+    getShiftsByEmployeeId,
+    getAllAssignments,
+    getAssignmentsByEmployeeId
+};
