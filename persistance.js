@@ -64,8 +64,16 @@ async function getAllShifts() {
  * @returns {Promise<Array>}
  */
 async function getShiftsByEmployeeId(employeeId) {
-    return await db.collection("shifts")
+    const assignments = await db.collection("assignments")
         .find({ employeeId: employeeId })
+        .toArray();
+
+    const shiftIds = [];
+    for (let a of assignments) {
+        shiftIds.push(a.shiftId);
+    }
+    return await db.collection("shifts")
+        .find({ shiftId: { $in: shiftIds } })
         .sort({ date: 1, startTime: 1 })
         .toArray();
 }
