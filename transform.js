@@ -16,3 +16,34 @@ async function addEmptyEmployeeArray() {
 }
 
 addEmptyEmployeeArray()
+
+async function addEmpToShiftArray() {
+    const client = new MongoClient(CONNECTION_STRING);
+    await client.connect();
+    db = client.db(DATABASE_NAME);
+
+    const shifts = db.collection("shifts")
+    const employees = await db.collection("employees").find().toArray()
+    const assignments = await db.collection("assignments").find().toArray()
+
+    for( let assign of assignments){
+        let empObjId = null;
+
+        for (let emp of employees){
+            if (emp.employeeId === assign.employeeId){
+                empObjId = emp._id
+            }
+        }
+
+        if (empObjId){
+            await shifts.updateOne(
+                {shiftId: assign.shiftId},
+                { $push: {employees: empObjId}}
+            )
+        }
+    }
+
+    console.log("Updated")
+}
+
+addEmpToShiftArray()
