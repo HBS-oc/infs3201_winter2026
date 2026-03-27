@@ -1,0 +1,5 @@
+- remove assignemnts
+- shifts will have employee array
+- code using employeeID and shiftID will need to change
+- updates will modify arrays in shifts
+- risk: wrong id mapping during moving of data
