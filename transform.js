@@ -12,10 +12,8 @@ async function addEmptyEmployeeArray() {
     const shifts = db.collection("shifts")
     await shifts.updateMany({}, {$set: {employees: []}})
 
-    console.log("Updated")
+    console.log("Added empty employee array")
 }
-
-addEmptyEmployeeArray()
 
 async function addEmpToShiftArray() {
     const client = new MongoClient(CONNECTION_STRING);
@@ -43,7 +41,31 @@ async function addEmpToShiftArray() {
         }
     }
 
-    console.log("Updated")
+    console.log("Added employees")
 }
 
-addEmpToShiftArray()
+
+async function cleanUpDB() {
+    const client = new MongoClient(CONNECTION_STRING);
+    await client.connect();
+    db = client.db(DATABASE_NAME);
+
+    const shifts = db.collection("shifts")
+    const employees = db.collection("employees")
+
+    await employees.updateMany({}, {$unset: {employeeId: ""}})
+    await shifts.updateMany({}, {$unset: {shiftId: ""}})
+    await db.collection("assignments").drop()
+
+    console.log("Cleanup process completed")
+}
+
+
+
+async function main(){
+    await addEmptyEmployeeArray()
+    await addEmpToShiftArray()
+    await cleanUpDB()
+}
+
+main()
