@@ -46,20 +46,11 @@ async function getShiftsByEmployeeId(employeeId) {
     return await persist.getShiftsByEmployeeId(employeeId);
 }
 
-/**
- * Get assignments for an employee.
- * @param {string} employeeId
- * @returns {Promise<Array>}
- */
-async function getAssignmentsByEmployeeId(employeeId) {
-    return await persist.getAssignmentsByEmployeeId(employeeId);
-}
 
 module.exports = {
     connect,
     getAllEmployees,
     getEmployeeById,
     updateEmployee,
-    getShiftsByEmployeeId,
-    getAssignmentsByEmployeeId
+    getShiftsByEmployeeId
 };
