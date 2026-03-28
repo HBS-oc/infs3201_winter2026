@@ -1,4 +1,4 @@
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
 const CONNECTION_STRING = "mongodb://60302091:G3TeCNnCT7HoFoo2@cluster0-shard-00-00.wrr68.mongodb.net:27017,cluster0-shard-00-01.wrr68.mongodb.net:27017,cluster0-shard-00-02.wrr68.mongodb.net:27017/infs3201_winter2026?ssl=true&authSource=admin&replicaSet=atlas-2te6sv-shard-0&retryWrites=true&w=majority";
 const DATABASE_NAME = "infs3201_winter2026";
@@ -31,7 +31,7 @@ async function getAllEmployees() {
  * @returns {Promise<Object|null>} employee
  */
 async function getEmployeeById(employeeId) {
-    return await db.collection("employees").findOne({ employeeId: employeeId });
+    return await db.collection("employees").findOne({ _id: new ObjectId(employeeId)});
 }
 
 /**
@@ -43,7 +43,7 @@ async function getEmployeeById(employeeId) {
  */
 async function updateEmployee(employeeId, name, phone) {
     await db.collection("employees").updateOne(
-        { employeeId: employeeId },
+        { _id: new ObjectId(employeeId) },
         { $set: { name: name, phone: phone } }
     );
 }
@@ -64,38 +64,7 @@ async function getAllShifts() {
  * @returns {Promise<Array>}
  */
 async function getShiftsByEmployeeId(employeeId) {
-    const assignments = await db.collection("assignments")
-        .find({ employeeId: employeeId })
-        .toArray();
-
-    const shiftIds = [];
-    for (let a of assignments) {
-        shiftIds.push(a.shiftId);
-    }
-    return await db.collection("shifts")
-        .find({ shiftId: { $in: shiftIds } })
-        .sort({ date: 1, startTime: 1 })
-        .toArray();
-}
-
-
-/**
- * Retrieves all assignments.
- * @returns {Promise<Array>}
- */
-async function getAllAssignments() {
-    return await db.collection("assignments").find().toArray();
-}
-
-/**
- * Retrieves assignments for a specific employee.
- * @param {string} employeeId
- * @returns {Promise<Array>}
- */
-async function getAssignmentsByEmployeeId(employeeId) {
-    return await db.collection("assignments")
-        .find({ employeeId: employeeId })
-        .toArray();
+    return await db.collection("shifts").find({employees: new ObjectId(employeeId)}).toArray();
 }
 
 module.exports = {
@@ -104,7 +73,5 @@ module.exports = {
     getEmployeeById,
     updateEmployee,
     getAllShifts,
-    getShiftsByEmployeeId,
-    getAllAssignments,
-    getAssignmentsByEmployeeId
+    getShiftsByEmployeeId
 };
