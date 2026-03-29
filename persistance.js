@@ -16,6 +16,16 @@ async function connect() {
     db = client.db(DATABASE_NAME);
 }
 
+/**
+ * Verifies login of the user by querying the database.
+ * @param {*} username username of the user
+ * @param {*} hashedPassword hashed password of the user
+ * @returns 
+ */
+async function getUserByLogin(username, hashedPassword){
+    return await db.collection("users").find({ username: username, password: hashedPassword})
+}
+
 
 /**
  * Retrieves all employees.

@@ -1,4 +1,5 @@
 const persist = require("./persistance.js");
+const crypto = require("crypto")
 
 /**
  * Initializes the business layer (connects to MongoDB).
@@ -7,6 +8,21 @@ const persist = require("./persistance.js");
  */
 async function connect() {
     await persist.connect();
+}
+
+/**
+ * 
+ * @param {*} plain plain text password
+ * @returns hashed password
+ */
+function hashPassword(plain){
+    return crypto.createHash("sha256").update(plain).digest("hex")
+}
+
+
+async function verifyLogin(username, password){
+    const hashedPass = hashPassword(password)
+    return persist.getUserByLogin(username, hashedPass)
 }
 
 /**
