@@ -45,6 +45,7 @@ app.get("/logout", async (req, res) => {
 })
 
 app.use(authMW)
+app.use(logMW)
 
 app.get("/", async (req, res) => {
   const employees = await bus.getAllEmployees();
@@ -87,6 +88,12 @@ app.post("/employee/:employeeId/edit", async (req, res) => {
   res.redirect("/"); 
 });
 
+/**
+ * Authentication middleware to redirect to login page on session expiry
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
 async function authMW(req, res, next){
   if (req.path == "/login"){
     return next()
@@ -107,6 +114,14 @@ async function authMW(req, res, next){
   req.username = session.username;
 
   next()
+}
+
+async function logMW(req, res, next){
+  const username = req.username || null
+
+  await bus.logEvent(username, req.path, req.method)
+
+  next();
 }
 
 async function start() {

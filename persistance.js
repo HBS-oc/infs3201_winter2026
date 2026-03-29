@@ -77,6 +77,15 @@ async function getSessionById(sId){
     return await db.collection("sessions").findOne({sessionId: sId})
 }
 
+async function securityLog(username, url, method){
+    await db.collection("logs").insertOne({
+        timestamp: new Date(Date.now()),
+        username: username,
+        url: url,
+        method: method
+    })
+}
+
 /**
  * Update session expiry
  * @param {*} sId 
@@ -129,5 +138,6 @@ module.exports = {
     createSession,
     updateSessionExpiry,
     terminateSession,
-    getSessionById
+    getSessionById,
+    securityLog
 };

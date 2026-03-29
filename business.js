@@ -11,7 +11,7 @@ async function connect() {
 }
 
 /**
- * 
+ * hashes the password
  * @param {*} plain plain text password
  * @returns hashed password
  */
@@ -33,6 +33,11 @@ async function getAllEmployees() {
     return await persist.getAllEmployees();
 }
 
+/**
+ * Starts a session for the user
+ * @param {*} username 
+ * @returns sessionId for storage
+ */
 async function startSession(username){
     const sessionId = crypto.randomUUID()
     const expiry = new Date(Date.now() + 5 * 60 * 1000)
@@ -42,6 +47,11 @@ async function startSession(username){
     return sessionId
 }
 
+/**
+ * Validating the session via sessionId
+ * @param {*} sId 
+ * @returns sessionData
+ */
 async function validateSession(sId){
     const session = await persist.getSessionById(sId)
 
@@ -71,6 +81,10 @@ async function logout(sId){
  */
 async function getEmployeeById(id) {
     return await persist.getEmployeeById(id);
+}
+
+async function logEvent(username, url, method){
+    await persist.securityLog(username, url, method)
 }
 
 /**
@@ -103,5 +117,6 @@ module.exports = {
     verifyLogin,
     startSession,
     validateSession,
-    logout
+    logout,
+    logEvent
 };
