@@ -23,7 +23,7 @@ async function connect() {
  * @returns 
  */
 async function getUserByLogin(username, hashedPassword){
-    return await db.collection("users").find({ username: username, password: hashedPassword})
+    return await db.collection("users").findOne({ username: username, password: hashedPassword})
 }
 
 
@@ -83,5 +83,6 @@ module.exports = {
     getEmployeeById,
     updateEmployee,
     getAllShifts,
-    getShiftsByEmployeeId
+    getShiftsByEmployeeId,
+    getUserByLogin
 };

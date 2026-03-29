@@ -22,7 +22,7 @@ function hashPassword(plain){
 
 async function verifyLogin(username, password){
     const hashedPass = hashPassword(password)
-    return persist.getUserByLogin(username, hashedPass)
+    return await persist.getUserByLogin(username, hashedPass)
 }
 
 /**
@@ -68,5 +68,6 @@ module.exports = {
     getAllEmployees,
     getEmployeeById,
     updateEmployee,
-    getShiftsByEmployeeId
+    getShiftsByEmployeeId,
+    verifyLogin
 };

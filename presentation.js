@@ -16,6 +16,24 @@ app.get("/", async (req, res) => {
 });
 
 
+app.get("/login", async (req, res) => {
+  res.render("login")
+})
+
+app.post("/login", async (req, res) => {
+  const username = (req.body.username || "").trim()
+  const password = (req.body.password || "").trim()
+
+  const user = await bus.verifyLogin(username, password)
+
+  if (!user){
+    return res.render("login", {message: "Invalid login"})
+  }
+
+  res.send("Login works")
+  
+})
+
 app.get("/employee/:employeeId", async (req, res) => {
   const employeeId = req.params.employeeId.trim();
 
