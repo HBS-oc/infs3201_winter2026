@@ -58,6 +58,47 @@ async function updateEmployee(employeeId, name, phone) {
     );
 }
 
+/**
+ * Creates session in the database
+ * @param {*} sId 
+ * @param {*} username 
+ * @param {*} expiry 
+ */
+async function createSession(sId, username, expiry){
+    await db.collection("sessions").insertOne({sessionId: sId, username: username, expiry: expiry})
+}
+
+/**
+ * Gets session by querying ID
+ * @param {*} sId 
+ * @returns 
+ */
+async function getSessionById(sId){
+    return await db.collection("sessions").findOne({sessionId: sId})
+}
+
+/**
+ * Update session expiry
+ * @param {*} sId 
+ * @param {*} expiry 
+ */
+async function updateSessionExpiry(sId, expiry){
+    await db.collection("sessions").updateOne(
+        {sessionId: sId},
+        {$set: {expiry: expiry}}
+    )
+}
+
+/**
+ * Terminates the session from the DB
+ * @param {*} sId 
+ */
+async function terminateSession(sId){
+    await db.collection("sessions").deleteOne({
+        sessionId: sId
+    })
+}
+
 
 /**
  * Retrieves all shifts.
@@ -84,5 +125,9 @@ module.exports = {
     updateEmployee,
     getAllShifts,
     getShiftsByEmployeeId,
-    getUserByLogin
+    getUserByLogin,
+    createSession,
+    updateSessionExpiry,
+    terminateSession,
+    getSessionById
 };

@@ -33,6 +33,37 @@ async function getAllEmployees() {
     return await persist.getAllEmployees();
 }
 
+async function startSession(username){
+    const sessionId = crypto.randomUUID()
+    const expiry = new Date(Date.now() + 5 * 60 * 1000)
+
+    await persist.createSession(sessionId, username, expiry)
+
+    return sessionId
+}
+
+async function validateSession(sId){
+    const session = await persist.getSessionById(sId)
+
+    if(!session){
+        return null
+    }
+
+    if (session.expiry < Date.now()){
+        await persist.terminateSession(sId)
+        return null
+    }
+
+    const newExpiry = new Date(Date.now() + 5 * 60 * 1000)
+    await persist.updateSessionExpiry(sId, newExpiry)
+
+    return session
+}
+
+async function logout(sId){
+    await persist.terminateSession(sId)
+}
+
 /**
  * Get one employee by id.
  * @param {string} id
@@ -69,5 +100,8 @@ module.exports = {
     getEmployeeById,
     updateEmployee,
     getShiftsByEmployeeId,
-    verifyLogin
+    verifyLogin,
+    startSession,
+    validateSession,
+    logout
 };
