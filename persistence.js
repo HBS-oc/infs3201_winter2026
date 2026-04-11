@@ -9,7 +9,7 @@ async function getDatabase() {
     if (cachedClient) {
         return cachedDb // already connected so use the cache
     }
-    cachedClient = new mongodb.MongoClient('mongodb+srv://HBS:1234@cluster0.4c0yw4t.mongodb.net/?appName=Cluster0')
+    cachedClient = new mongodb.MongoClient('mongodb://HBS:1234@ac-a7xqvt3-shard-00-00.4c0yw4t.mongodb.net:27017,ac-a7xqvt3-shard-00-01.4c0yw4t.mongodb.net:27017,ac-a7xqvt3-shard-00-02.4c0yw4t.mongodb.net:27017/?ssl=true&replicaSet=atlas-xiq16c-shard-0&authSource=admin&appName=Cluster0')
     await cachedClient.connect()
     cachedDb = cachedClient.db('infs3201_winter2026')
     return cachedDb

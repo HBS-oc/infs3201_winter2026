@@ -2,7 +2,7 @@ const mongodb = require('mongodb')
 
 
 async function getDatabase() {
-    cachedClient = new mongodb.MongoClient('mongodb+srv://HBS:1234@cluster0.4c0yw4t.mongodb.net/?appName=Cluster0')
+    cachedClient = new mongodb.MongoClient('mongodb://HBS:1234@ac-a7xqvt3-shard-00-00.4c0yw4t.mongodb.net:27017,ac-a7xqvt3-shard-00-01.4c0yw4t.mongodb.net:27017,ac-a7xqvt3-shard-00-02.4c0yw4t.mongodb.net:27017/?ssl=true&replicaSet=atlas-xiq16c-shard-0&authSource=admin&appName=Cluster0')
     await cachedClient.connect()
 
     cachedDb = cachedClient.db('infs3201_winter2026')
@@ -54,12 +54,17 @@ async function createEmptyListsInShifts() {
 }
 
 // createEmptyListsInShifts()
-loadEmployeesInShifts()
+//loadEmployeesInShifts()
 
-/*
-clean up
+cleanup()
 
-db.employees.updateMany({}, {$unset: {employeeId: ""}})
-db.shifts.updateMany({}, {$unset: {shiftId: ""}})
-db.assignments.drop()
-*/
+async function cleanup() {
+    let db = await getDatabase();
+    let employees = db.collection('employees')
+    let shifts = db.collection('shifts')
+    let assignment = db.collection('assignments')
+    await employees.updateMany({}, {$unset: {employeeId: ""}})
+    await shifts.updateMany({}, {$unset: {shiftId: ""}})
+    await assignment.drop()
+    await closeDatabase()
+}
