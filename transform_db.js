@@ -53,7 +53,7 @@ async function createEmptyListsInShifts() {
     await closeDatabase()
 }
 
-createEmptyListsInShifts()
+// createEmptyListsInShifts()
 loadEmployeesInShifts()
 
 /*
