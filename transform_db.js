@@ -1,13 +1,10 @@
 const mongodb = require('mongodb')
 
-let cachedClient = undefined
 
 async function getDatabase() {
-    if (cachedClient) {
-        return cachedDb // already connected so use the cache
-    }
-    cachedClient = new mongodb.MongoClient('mongodb+srv://robert:12class34@cluster0.qgtdkrd.mongodb.net/')
+    cachedClient = new mongodb.MongoClient('mongodb+srv://HBS:1234@cluster0.4c0yw4t.mongodb.net/?appName=Cluster0')
     await cachedClient.connect()
+
     cachedDb = cachedClient.db('infs3201_winter2026')
     return cachedDb
 }
@@ -56,7 +53,7 @@ async function createEmptyListsInShifts() {
     await closeDatabase()
 }
 
-//createEmptyListsInShifts()
+createEmptyListsInShifts()
 loadEmployeesInShifts()
 
 /*
