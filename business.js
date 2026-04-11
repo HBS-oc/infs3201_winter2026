@@ -1,4 +1,5 @@
 const persistence = require('./persistence.js')
+const email = require('./emailSystem.js')
 
 /**
  * Return a list of all employees loaded from the storage.
@@ -10,6 +11,10 @@ async function getAllEmployees() {
 
 async function getEmployee(id) {
     return await persistence.findEmployee(id)
+}
+
+function generateOTP(){
+    return Math.floor(100000 + Math.random()*900000).toString()
 }
 
 /**
