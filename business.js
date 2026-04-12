@@ -9,8 +9,6 @@ async function getAllEmployees() {
     return await persistence.getAllEmployees()
 }
 
-email.sendTwoFactorCode("test@test.com", generateOTP())
-
 async function getEmployee(id) {
     return await persistence.findEmployee(id)
 }
