@@ -15,6 +15,50 @@ async function getDatabase() {
     return cachedDb
 }
 
+async function setTwoFactorCode(user, code, expiry){
+    let db = await getDatabase()
+    let users = db.collection('users')
+    await users.updateOne({user: user}, {$set: {twoFAcode: code, twoFAexpiry: expiry}})
+}
+
+async function incrementFailed(user){
+    let db = await getDatabase()
+    let users = db.collection('users')
+    await users.updateOne({user: user}, {$inc: { failedLogins: 1}})
+}
+
+async function getFailedLogins(user){
+    let db = await getDatabase()
+    let users = db.collection('users')
+    const user = users.findOne({user: user})
+    return user.failedLogins
+}
+
+async function lockAccount(user){
+    let db = await getDatabase()
+    let users = db.collection('users')
+    await users.updateOne({user: user}, {$set: {locked: true}})
+}
+
+async function unlockAccount(user){
+    let db = await getDatabase()
+    let users = db.collection('users')
+    await users.updateOne({user: user}, {$set: {locked: false}})
+}
+
+async function resetFailedLogins(user){
+    let db = await getDatabase()
+    let users = db.collection('users')
+    await users.updateOne({user: user}, {$set: { failedLogins: 0}})
+}
+
+async function getEmail(user){
+    let db = await getDatabase()
+    let users = db.collection('users')
+    const user = users.findOne({user: user})
+    return user.email
+}
+
 async function disconnectDatabase() {
     if (!cachedClient) {
         return
@@ -211,5 +255,7 @@ module.exports = {
     findShift, getEmployeeShifts,
     addEmployeeRecord,
     disconnectDatabase, findEmployee, updateEmployee,
-    checkCredentials, createSession, getSessionData, extendSession, logEvent
+    checkCredentials, createSession, getSessionData, extendSession, logEvent,
+    setTwoFactorCode, incrementFailed, getFailedLogins, resetFailedLogins,
+    getEmail, lockAccount, unlockAccount
 }

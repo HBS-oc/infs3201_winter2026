@@ -56,7 +56,7 @@ async function createEmptyListsInShifts() {
 //createEmptyListsInShifts()
 //loadEmployeesInShifts()
 
-cleanup()
+//cleanup()
 
 async function cleanup() {
     let db = await getDatabase();

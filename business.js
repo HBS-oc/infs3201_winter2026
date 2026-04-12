@@ -17,6 +17,20 @@ function generateOTP(){
     return Math.floor(100000 + Math.random()*900000).toString()
 }
 
+async function login2fa(user, password){
+    let result = await persistence.checkCredentials(user, password)
+    if (!result) { 
+        return false;
+    }
+
+    const code = generateOTP()
+    const expiry = new Date(Date.now() + 3*60*1000)
+
+    await persistence.setTwoFactorCode(user, code, expiry)
+
+    
+}
+
 /**
  * Attempt to do a login. If successful then the function will return a session ID and a time duration
  * in seconds for the validity of the session. If unsuccessful then the function returns null.
