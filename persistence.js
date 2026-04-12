@@ -21,6 +21,18 @@ async function setTwoFactorCode(user, code, expiry){
     await users.updateOne({user: user}, {$set: {twoFAcode: code, twoFAexpiry: expiry}})
 }
 
+async function releaseTwoFactorCode(user){
+    let db = await getDatabase()
+    let users = db.collection('users')
+    await users.updateOne({user: user}, {$unset: {twoFAcode: "", twoFAexpiry: ""}})
+}
+
+async function getTwoFactorCode(user){
+    let db = await getDatabase()
+    let users = db.collection('users')
+    return await users.findOne({user: user}, {projection: {twoFAcode: 1, twoFAexpiry: 1}})
+}
+
 async function incrementFailed(user){
     let db = await getDatabase()
     let users = db.collection('users')
@@ -257,5 +269,5 @@ module.exports = {
     disconnectDatabase, findEmployee, updateEmployee,
     checkCredentials, createSession, getSessionData, extendSession, logEvent,
     setTwoFactorCode, incrementFailed, getFailedLogins, resetFailedLogins,
-    getEmail, lockAccount, unlockAccount
+    getEmail, lockAccount, unlockAccount, getTwoFactorCode, releaseTwoFactorCode
 }

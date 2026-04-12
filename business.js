@@ -20,15 +20,52 @@ function generateOTP(){
 async function login2fa(user, password){
     let result = await persistence.checkCredentials(user, password)
     if (!result) { 
+        await persistence.incrementFailed(user)
+        let userMail = await persistence.getEmail(user)
+        let checkLocked = await persistence.getFailedLogins(user)
+
+        if (checkLocked === 3){
+            await email.suspiciousActivity(userMail)
+        }
+        if (checkLocked >= 10){
+            await persistence.lockAccount(user)
+        }
         return false;
     }
 
+    let checkLocked = await persistence.getFailedLogins(user)
+    if (checkLocked >= 10){
+        await persistence.lockAccount(user)
+        return false    
+    }
+
+    let userMail = await persistence.getEmail(user)
     const code = generateOTP()
     const expiry = new Date(Date.now() + 3*60*1000)
 
     await persistence.setTwoFactorCode(user, code, expiry)
+    await email.sendTwoFactorCode(userMail, code)
 
-    
+    return true
+}
+
+async function verify2fa(user, code){
+    let dbcode = await persistence.getTwoFactorCode(user)
+
+    if (!dbcode){
+        return false
+    }
+    if (dbcode.twoFAexpiry < Date.now()){
+        return false
+    }
+    if (dbcode.twoFAcode != code){
+        return false
+    }
+
+    await persistence.releaseTwoFactorCode(user)
+    await persistence.resetFailedLogins(user)
+
+    return true
 }
 
 /**
@@ -213,5 +250,5 @@ async function updateEmployee(emp) {
 module.exports = {
     getAllEmployees, assignShift, addEmployeeRecord, getEmployeeShifts, disconnectDatabase,
     getEmployee, updateEmployee,
-    startSession, validSession, extendSession, logEvent
+    startSession, validSession, extendSession, logEvent, verify2fa, login2fa
 }
