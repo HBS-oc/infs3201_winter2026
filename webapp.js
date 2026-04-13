@@ -2,6 +2,7 @@ const express = require('express')
 const handlebars = require('express-handlebars')
 const cookieParser = require('cookie-parser')
 const business = require('./business.js')
+const fileUpload = require('express-fileupload')
 
 app = express()
 app.set('view engine', 'hbs')
@@ -10,12 +11,14 @@ app.engine('hbs', handlebars.engine())
 app.use('/public', express.static( __dirname+"/static"))
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
+app.use(fileUpload())
 
 app.use(async (req, res, next) => {
     let sessionId = req.cookies.session
     await business.logEvent(sessionId, req.url, req.method)
     next()
 })
+
 
 app.get('/login', (req, res) => {
     let message = req.query.msg
@@ -96,6 +99,29 @@ app.use(async (req, res, next) => {
     let validTime = await business.extendSession(sessionId)
     res.cookie('session', sessionId, {maxAge: validTime*1000})
     next()
+})
+
+app.post('/uploadfile', async (req, res) =>{
+
+    let eid = req.body.eid
+    
+    if(!req.files || !req.files.submission){
+        return res.send("No File Uploaded")
+    }
+
+    let file = req.files.submission
+
+    if (file.mimetype !== "application/pdf"){
+        return res.send("Only PDF format allowed")
+    }
+
+    if (file.size > 2*1024*1024){
+        return res.send("File too large")
+    }
+
+    await file.mv(`${__dirname}/uploads/${Date.now()}_${file.name}`)
+    res.send("upload completed")
+    
 })
 
 app.get('/', async (req, res) => {
