@@ -119,9 +119,23 @@ app.post('/uploadfile', async (req, res) =>{
         return res.send("File too large")
     }
 
-    await file.mv(`${__dirname}/uploads/${Date.now()}_${file.name}`)
+    let verify = await business.fileUpload(eid, file)
+    
+    if (!verify){
+        res.send("Upload failed")
+    }
+
     res.send("upload completed")
     
+})
+
+app.get('/documents/:id', async (req,res) => {
+    let dId = req.params.id
+    let document = await business.getSingleDocument(dId)
+
+    console.log(document)
+
+    res.sendFile(require('path').resolve("uploads/" + document.filename))
 })
 
 app.get('/', async (req, res) => {
@@ -132,11 +146,12 @@ app.get('/', async (req, res) => {
 app.get('/employee/:eid', async (req, res) => {
     let employeeDetails = await business.getEmployee(req.params.eid)
     let shifts = await business.getEmployeeShifts(req.params.eid)
+    let documents = await business.getDocuments(req.params.eid)
     for (let s of shifts) {
         s.startEarly = s.startTime < '12:00'
         s.endEarly = s.endTime < '12:00'
     }
-    res.render('single_employee', {employeeDetails, shifts, layout: undefined})
+    res.render('single_employee', {employeeDetails, shifts, documents, layout: undefined})
 })
 
 app.get('/edit/:eid', async (req, res) => {

@@ -52,6 +52,24 @@ async function getFailedLogins(user){
     return u.failedLogins
 }
 
+async function fileUploads(eid, fname){
+    let db = await getDatabase()
+    let files = db.collection('employee-files')
+    await files.insertOne({empId: eid, filename: fname, uploadedAt: new Date(Date.now())})
+}
+
+async function getFilesFromEmpId(eid){
+    let db = await getDatabase()
+    let files = db.collection('employee-files')
+    return await files.find({empId: eid}).toArray()
+}
+
+async function getFileFromId(dId){
+    let db = await getDatabase()
+    let files = db.collection('employee-files')
+    return await files.findOne({_id: new mongodb.ObjectId(dId)})
+}
+
 async function lockAccount(user){
     let db = await getDatabase()
     let users = db.collection('users')
@@ -277,5 +295,5 @@ module.exports = {
     checkCredentials, createSession, getSessionData, extendSession, logEvent,
     setTwoFactorCode, incrementFailed, getFailedLogins, resetFailedLogins,
     getEmail, lockAccount, unlockAccount, getTwoFactorCode, releaseTwoFactorCode,
-    resetAllFailed
+    resetAllFailed, fileUploads, getFilesFromEmpId, getFileFromId
 }

@@ -17,6 +17,33 @@ function generateOTP(){
     return Math.floor(100000 + Math.random()*900000).toString()
 }
 
+async function fileUpload(eid, file){
+
+    let files = await persistence.getFilesFromEmpId(eid)
+    
+
+    if(files.length >= 5){
+        return false
+    }
+
+    let fname = `${Date.now()}_${file.name}`
+
+    await file.mv(`${__dirname}/uploads/${fname}`)
+    await persistence.fileUploads(eid, fname)
+
+    return true
+}
+
+async function getDocuments(eid){
+    let documents = await persistence.getFilesFromEmpId(eid)
+    return documents
+}
+
+async function getSingleDocument(dId){
+    let document = await persistence.getFileFromId(dId)
+    return document
+}
+
 async function login2fa(user, password){
     let result = await persistence.checkCredentials(user, password)
     if (!result) { 
@@ -248,5 +275,6 @@ async function updateEmployee(emp) {
 module.exports = {
     getAllEmployees, assignShift, addEmployeeRecord, getEmployeeShifts, disconnectDatabase,
     getEmployee, updateEmployee,
-    startSession, validSession, extendSession, logEvent, verify2fa, login2fa,resetAllFailed
+    startSession, validSession, extendSession, logEvent, verify2fa, login2fa,resetAllFailed,fileUpload, getDocuments,
+    getSingleDocument
 }
