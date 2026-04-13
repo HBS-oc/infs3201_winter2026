@@ -48,6 +48,9 @@ async function login2fa(user, password){
 
     return true
 }
+async function resetAllFailed(){
+    await persistence.resetAllFailed()
+}
 
 async function verify2fa(user, code){
     let dbcode = await persistence.getTwoFactorCode(user)
@@ -74,18 +77,13 @@ async function verify2fa(user, code){
  * @param {String} username 
  * @param {String} password 
  */
-async function startSession(username, password) {
-    // check that the credentials are valid
-    let result = await persistence.checkCredentials(username, password)
-    if (result) {
-        // credentials good... start a session.
-        const sessionId = crypto.randomUUID()
-        await persistence.createSession(sessionId, 5*60, {
-            user: username
-        })
-        return {sessionId, duration: 5*60}
-    }
-    return null
+async function startSession(username) {
+    const sessionId = crypto.randomUUID()
+    await persistence.createSession(sessionId, 5*60, {
+        user: username
+    })
+    return {sessionId, duration: 5*60}
+
 }
 
 /**
@@ -250,5 +248,5 @@ async function updateEmployee(emp) {
 module.exports = {
     getAllEmployees, assignShift, addEmployeeRecord, getEmployeeShifts, disconnectDatabase,
     getEmployee, updateEmployee,
-    startSession, validSession, extendSession, logEvent, verify2fa, login2fa
+    startSession, validSession, extendSession, logEvent, verify2fa, login2fa,resetAllFailed
 }

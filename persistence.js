@@ -27,6 +27,12 @@ async function releaseTwoFactorCode(user){
     await users.updateOne({user: user}, {$unset: {twoFAcode: "", twoFAexpiry: ""}})
 }
 
+async function resetAllFailed(){
+    let db = await getDatabase()
+    let users = db.collection('users')
+    await users.updateMany({}, {$set: {failedLogins: 0, locked: false}})
+}
+
 async function getTwoFactorCode(user){
     let db = await getDatabase()
     let users = db.collection('users')
@@ -42,8 +48,8 @@ async function incrementFailed(user){
 async function getFailedLogins(user){
     let db = await getDatabase()
     let users = db.collection('users')
-    const user = users.findOne({user: user})
-    return user.failedLogins
+    const u = await users.findOne({user: user})
+    return u.failedLogins
 }
 
 async function lockAccount(user){
@@ -67,8 +73,9 @@ async function resetFailedLogins(user){
 async function getEmail(user){
     let db = await getDatabase()
     let users = db.collection('users')
-    const user = users.findOne({user: user})
-    return user.email
+    const u = await users.findOne({user: user})
+    console.log(u)
+    return u.email
 }
 
 async function disconnectDatabase() {
@@ -269,5 +276,6 @@ module.exports = {
     disconnectDatabase, findEmployee, updateEmployee,
     checkCredentials, createSession, getSessionData, extendSession, logEvent,
     setTwoFactorCode, incrementFailed, getFailedLogins, resetFailedLogins,
-    getEmail, lockAccount, unlockAccount, getTwoFactorCode, releaseTwoFactorCode
+    getEmail, lockAccount, unlockAccount, getTwoFactorCode, releaseTwoFactorCode,
+    resetAllFailed
 }

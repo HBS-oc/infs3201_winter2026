@@ -18,8 +18,11 @@ async function sendTwoFactorCode(email, code){
     console.log("body: " + message.text)
     
     try{
-        await transport.sendMail({from:"no-reply@shifts.com",
-            ...message})
+        await transport.sendMail({
+            from:"no-reply@shifts.com",
+            to: email,
+            subject: "2FA code",
+            text: `Your 2FA code is ${code}`})
     } catch (err){
         console.log("Email sent has failed!", err.message)
     }
@@ -38,7 +41,9 @@ async function suspiciousActivity(email){
         
         transport.sendMail({
             from:"no-reply@shifts.com",
-            ...message
+            to: email,
+            subject: "Suspicious Activity Detected",
+            text: `Invalid attempts has been detected on your account`
         })
     } catch (err){
         console.log("Email sent has failed!", err.message)

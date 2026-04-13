@@ -8,26 +8,13 @@ app.set('view engine', 'hbs')
 app.set('views', __dirname + "/template")
 app.engine('hbs', handlebars.engine())
 app.use('/public', express.static( __dirname+"/static"))
-app.use(express.urlencoded({extended: false}))
+app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
 
 app.use(async (req, res, next) => {
     let sessionId = req.cookies.session
     await business.logEvent(sessionId, req.url, req.method)
     next()
-})
-
-app.post('/login', async (req, res) => {
-    let username = req.body.username
-    let password = req.body.password
-
-    let sessionDetails = await business.startSession(username, password)
-    if (!sessionDetails) {
-        res.redirect('/login?msg=Invalid username/password')
-        return
-    }
-    res.cookie('session', sessionDetails.sessionId, {maxAge: sessionDetails.duration*1000})
-    res.redirect('/')
 })
 
 app.get('/login', (req, res) => {
@@ -40,6 +27,56 @@ app.get('/login', (req, res) => {
         layout: undefined
     })
 })
+
+app.post('/reset-logins', async (req, res) => {
+    await business.resetAllFailed()
+
+    res.redirect('/login')
+})
+
+app.post('/login', async (req, res) => {
+    let username = req.body.username
+    let password = req.body.password
+
+    let login = await business.login2fa(username, password)
+    if (!login) {
+        res.redirect('/login?msg=Invalid username/password')
+        return
+    }
+    res.cookie('pending2fa', username)
+    res.redirect('/2fa')
+})
+
+app.get('/2fa', (req, res) =>{
+    let message = req.query.msg
+    if (!message) {
+        message = ""
+    }
+    res.render('2fa', {message: message, layout: undefined})
+})
+
+app.post('/2fa', async (req, res) => {
+    let user = req.cookies.pending2fa
+    let code = req.body.code
+    let verify = await business.verify2fa(user, code)
+
+    if (!code){
+        return res.redirect('/2fa?msg=Invalid code')
+    }
+    if (!verify){
+        return res.redirect('/2fa?msg=Invalid code')
+    }
+
+    let sessionDetails = await business.startSession(user)
+
+    res.cookie('session', sessionDetails.sessionId, {maxAge: sessionDetails.duration * 1000})
+
+    res.clearCookie('pending2faUser')
+
+    res.redirect('/')
+})
+
+
 
 app.get('/logout', (req, res) => {
     res.send('not completed yet')
